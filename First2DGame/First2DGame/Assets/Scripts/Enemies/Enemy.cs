@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Enemy : MonoBehaviour
+public class Enemy : MonoBehaviour, IPooledObject
 {
     [SerializeField]
     private EnemyScriptableObject enemyStats;
@@ -10,29 +10,36 @@ public class Enemy : MonoBehaviour
 
     [SerializeField]
     public GameObject player;
+    [SerializeField]
+    GameObject attackArea;
+    [SerializeField]
+    GameObject spawner;
+    [SerializeField]
+    string enemyType;
 
     // Trying a ray check, still usefull to avoid enemies following through walls, but I want to test other movement methods to keep physics and collisions
     Ray2D playerDistance;
 
     // Start is called before the first frame update
-    void Start()
+    public void OnObjectSpawn()
     {
         if (player == null)
             player = GameObject.FindGameObjectWithTag("Player");
-               
         StartCoroutine(ChasePlayer());
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(currentHealth <= 0)
-        {
-            Die();
-        }
+
     }
 
-     #region Damage taking or dealing
+    public void AssignType(string type)
+    {
+        enemyType = type;
+    }
+
+    #region Damage taking or dealing
 
     // Enemy takes damage
     public void TakeDamage(int damageTaken)
@@ -40,13 +47,17 @@ public class Enemy : MonoBehaviour
         currentHealth -= damageTaken;
         GetComponentInChildren<HealthBar>().SetHealth(currentHealth);
         StartCoroutine(DamageTaken());
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
     }
 
     // Enemy dies function
     void Die()
     {
-        Destroy(gameObject, 1.0f);
         gameObject.GetComponent<SpriteRenderer>().color = Color.gray;
+        ObjectPooling.Instance.Despawn(gameObject, enemyType, spawner.transform.position, Quaternion.identity);
     }
 
     // Courutine changes colour briefly to show that damage was taken
@@ -77,7 +88,11 @@ public class Enemy : MonoBehaviour
     // Courutine to run when in range
     IEnumerator CatchedPlayer()
     {
+        attackArea.SetActive(true);
         yield return new WaitForSeconds(enemyStats.chaseTimer);
+        if (Vector2.Distance(transform.position, player.transform.position) < enemyStats.AttackRange)
+            player.GetComponent<Health>().DamageTaken(enemyStats.Damage);
+        attackArea.SetActive(false);
         StartCoroutine(ChasePlayer());
     }
     #endregion

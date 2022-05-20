@@ -1,32 +1,23 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class PlayerMovement : MonoBehaviour
 {
     // ScriptableObject that saves the player stats
     [SerializeField]
-    private PlayerScriptableObject playerStats;
+    PlayerMovement_ScriptableObject playerStats;
+
     // Movement
     Vector2 direction;
 
     // Dash
     private bool cdFinished = true;
     private bool dashing;
-    private EnemyLayerInfo enemyData;
-
-    // HP
-    public int currentHealth;
 
     // Start is called before the first frame update
     void Start()
     {
-        // Save component to avoid rewriting it multiple times
-        playerStats.PlayerRB = this.GetComponent<Rigidbody2D>();
-
-        // Setting Health Bar
-        currentHealth = playerStats.Health;
-        GetComponentInChildren<HealthBar>().SetMaxHealth(playerStats.Health);
+        
     }
 
     // Update is called once per frame
@@ -48,15 +39,15 @@ public class PlayerMovement : MonoBehaviour
     {
         // Move as long as player is not dashing
         if (!dashing)
-        { 
+        {
             Movement(direction);
-        } 
+        }
         else
         {
             Dash();
         }
     }
-    
+
     // Moves the player in the direction given by the inputs. It goes faster the higher the 'speed'
     void Movement(Vector2 direction)
     {
@@ -82,18 +73,19 @@ public class PlayerMovement : MonoBehaviour
 
     // Start dashing, move in last direction given for DashDuration, then finish dashing.
     IEnumerator StartDash()
-    {   
-        // Change players colour for a visual cue, push player in direction and ignore enemy's collision. Then turn collision on again, finish dashing, back to normal colour.
-        while (dashing)
+    {
+        // Change players colour for a visual cue, push player in direction. finish dashing, back to normal colour.
+        while(dashing)
         {
             StartCoroutine(DashCooldown());
             gameObject.GetComponent<SpriteRenderer>().color = new Color(10, 10, 10);
             playerStats.PlayerRB.AddForce(direction.normalized * playerStats.DashSpeed, ForceMode2D.Impulse);
-            Physics2D.IgnoreLayerCollision(playerStats.playerLayer, enemyData.enemyLayer, true);
+            Debug.Log(direction.normalized);
             yield return new WaitForSeconds(playerStats.DashDuration);
-            Physics2D.IgnoreLayerCollision(playerStats.playerLayer, enemyData.enemyLayer, false);
             dashing = false;
         }
+        Debug.Log("Timer"); 
+
         gameObject.GetComponent<SpriteRenderer>().color = Color.red;
     }
 

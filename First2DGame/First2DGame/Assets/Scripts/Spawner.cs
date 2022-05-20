@@ -6,22 +6,29 @@ public class Spawner : MonoBehaviour
 {
     [field: SerializeField]
     GameObject[] enemies;
+    ObjectPooling objectPooler;
+
     [field: SerializeField]
-    GameObject spawnEnemy;
+    public string spawnerType;
+    [field: SerializeField]
+    int totalEnemies;
 
     // Start is called before the first frame update
     void Start()
     {
-        enemies = GameObject.FindGameObjectsWithTag("Enemy");
+        if (spawnerType == null)
+            spawnerType = "DefaultEnemy";
+        objectPooler = ObjectPooling.Instance;
+        for(int i = 0; i < totalEnemies; i++)
+        {
+            enemies[i] = objectPooler.SpawnFromPool(spawnerType, transform.position, Quaternion.identity);
+            enemies[i].GetComponent<Enemy>().AssignType(spawnerType);
+        } 
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(enemies[0] == null)
-        {
-            GameObject newEnemy = Instantiate(spawnEnemy, gameObject.transform.position, gameObject.transform.rotation);
-            enemies[0] = newEnemy;
-        }
+        
     }
 }

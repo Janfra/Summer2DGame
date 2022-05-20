@@ -6,15 +6,17 @@ using UnityEngine;
 public class PlayerShooting : MonoBehaviour
 {
     [SerializeField]
-    PlayerScriptableObject playerStats;
+    PlayerMovement_ScriptableObject playerStats;
     // Aiming
     private Camera mainCam;
     Vector2 mousePosition;
+
     // Shooting
     public Transform firePoint;
     public GameObject throwStarPrefab;
     public float throwForce = 10.0f;
-        // Ammo
+
+    // Ammo
     [field: SerializeField]
     GameObject textAmmo;
     public int totalAmmo = 5;
@@ -26,9 +28,11 @@ public class PlayerShooting : MonoBehaviour
     void Start()
     {
         // Get camera
-        mainCam = GameObject.Find("Main Camera").GetComponent<Camera>();
+        mainCam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
         ammo = totalAmmo;
         textAmmo = GameObject.Find("Ammo");
+        // Save component to avoid rewriting it multiple times
+        playerStats.PlayerRB = this.GetComponent<Rigidbody2D>();
     }
 
     // Update is called once per frame
