@@ -12,27 +12,49 @@ public class PlayerShooting : MonoBehaviour
     Vector2 mousePosition;
 
     // Shooting
-    public Transform firePoint;
-    public GameObject throwStarPrefab;
-    public float throwForce = 10.0f;
+    [field: SerializeField]
+    private Transform firePoint;
+    [field: SerializeField]
+    private float throwForce = 10.0f;
+    bool shooting = false;
 
     // Ammo
-    [field: SerializeField]
-    GameObject textAmmo;
+    TMP_Text ammoDisplay;
     public int totalAmmo = 5;
-    public int ammo;
+    private int ammo;
     public float rechargeTime = 1.5f;
     private bool recharging = false;
 
+    // Bullet Pooling
+    ObjectPooling objectPooler;
+    [field: SerializeField]
+    Rigidbody2D[] bulletRB;
+    int currentBullet = 0;
+    [field: SerializeField]
+    string ammoType;
+
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         // Get camera
         mainCam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+
+        // Set the ammo
         ammo = totalAmmo;
-        textAmmo = GameObject.Find("Ammo");
-        // Save component to avoid rewriting it multiple times
+
+        // Get the text on screen and save it to change it
+        GameObject ammoFinder = GameObject.Find("Ammo");
+        ammoDisplay = ammoFinder.GetComponent<TMP_Text>();
+
+        // Set the playerRB in the scriptable object
         playerStats.PlayerRB = this.GetComponent<Rigidbody2D>();
+
+        bulletRB = new Rigidbody2D[totalAmmo];
+    }
+
+    private void Start()
+    {
+        objectPooler = ObjectPooling.Instance;
     }
 
     // Update is called once per frame
@@ -45,7 +67,7 @@ public class PlayerShooting : MonoBehaviour
         if (Input.GetMouseButtonDown(1) && !recharging)
         {
             ammo -= 1;
-            ThrowStar();
+            shooting = true;
             if(ammo <= 0)
             {
                 OutOfAmmo();
@@ -65,15 +87,21 @@ public class PlayerShooting : MonoBehaviour
         // Calculate the angle of the resulting vector and convert it to degrees, then change the rotation to it
         float angle = Mathf.Atan2(faceDirection.y, faceDirection.x) * Mathf.Rad2Deg - 90f;
         playerStats.PlayerRB.rotation = angle;
+
+        if (shooting)
+        {
+            ThrowStar();
+        }
     }
 
     // Spawn throw star, store its information and then add force to it to "throw it".
     void ThrowStar()
     {
-        GameObject star = Instantiate(throwStarPrefab, firePoint.position, firePoint.rotation);
-        Rigidbody2D starRB = star.GetComponent<Rigidbody2D>();
-        starRB.AddForce(firePoint.up * throwForce, ForceMode2D.Impulse);
-        textAmmo.GetComponent<TMP_Text>().text = "Ammo: " + ammo;
+        objectPooler.SpawnFromPool(ammoType, firePoint.position, firePoint.rotation);
+        bulletRB[currentBullet].AddForce(firePoint.up * throwForce, ForceMode2D.Impulse);
+        NextBullet();
+        ammoDisplay.text = "Ammo: " + ammo;
+        shooting = false;
     }
 
     void OutOfAmmo()
@@ -86,11 +114,36 @@ public class PlayerShooting : MonoBehaviour
         recharging = true;
         while (recharging)
         {
-            textAmmo.GetComponent<TMP_Text>().text = "Recharging...";
+            ammoDisplay.text = "Recharging...";
             yield return new WaitForSeconds(rechargeTime);
             recharging = false;
         }
         ammo = totalAmmo;
-        textAmmo.GetComponent<TMP_Text>().text = "Ammo: " + ammo;
+        ammoDisplay.text = "Ammo: " + ammo;
+    }
+
+    void BulletStoring()
+    {
+        for(int i = 0; i < totalAmmo; i++)
+        {
+            GameObject bullet = objectPooler.SpawnFromPool(ammoType, firePoint.position, firePoint.rotation);
+            bulletRB[i] = bullet.GetComponent<Rigidbody2D>();
+            bullet.SetActive(false);
+        }
+    }
+
+    public void BulletStore(Rigidbody2D rigidbody2D)
+    {
+        bulletRB[currentBullet] = rigidbody2D;
+        NextBullet();
+    }
+
+    void NextBullet()
+    {
+        currentBullet++;
+        if(currentBullet == totalAmmo)
+        {
+            currentBullet = 0;
+        }
     }
 }

@@ -9,8 +9,8 @@ public class HealthBar : MonoBehaviour
     {
         if(slider == null)
             slider = this.GetComponent<Slider>();
-        if(gameObject.GetComponentInParent<Enemy>() != null)
-            gameObject.GetComponentInParent<Enemy>().HealthSetting();
+        if(gameObject.GetComponentInParent<EnemyHealth>() != null)
+            gameObject.GetComponentInParent<EnemyHealth>().HealthSetting();
         if (gameObject.GetComponentInParent<Health>() != null)
             gameObject.GetComponentInParent<Health>().HealthSetting();
     }

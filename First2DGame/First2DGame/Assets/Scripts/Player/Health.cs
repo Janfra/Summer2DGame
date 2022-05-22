@@ -5,32 +5,37 @@ using UnityEngine;
 public class Health : MonoBehaviour
 {
     [SerializeField]
-    PlayerHealth_SO playerHealth;
+    private PlayerHealth_SO playerHealth;
+    HealthBar healthDisplay;
+    SpriteRenderer playerColour;
 
-    [field: SerializeField]
-    GameObject playerPrefab;
-    [field: SerializeField]
-    Vector2 spawnPoint;
+    // Possibly respawn. Not the best place to do
+    [SerializeField]
+    private GameObject playerPrefab;
+    [SerializeField]
+    private Vector2 spawnPoint;
 
     // HP
-    public int currentHealth;
+    private int currentHealth;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         // Setting Health Bar
         currentHealth = playerHealth.Health;
+        healthDisplay = GetComponentInChildren<HealthBar>();
+        playerColour = GetComponent<SpriteRenderer>();
     }
 
     public void HealthSetting()
     {
-        GetComponentInChildren<HealthBar>().SetMaxHealth(playerHealth.Health);
+        healthDisplay.SetMaxHealth(playerHealth.Health);
     }
 
     public void DamageTaken(int damage)
     {
         currentHealth -= damage;
-        GetComponentInChildren<HealthBar>().SetHealth(currentHealth);
+        healthDisplay.SetHealth(currentHealth);
         StartCoroutine(Damaged());
         if (currentHealth <= 0)
         {
@@ -40,13 +45,20 @@ public class Health : MonoBehaviour
 
     IEnumerator Damaged()
     {
-        GetComponent<SpriteRenderer>().color = new Color(250, 110, 201);
+        playerColour.color = new Color(250, 110, 201);
         yield return new WaitForSeconds(0.2f);
-        GetComponent<SpriteRenderer>().color = Color.red;
+        playerColour.color = Color.red;
     }
 
     void Die()
     {
         Debug.Log("Player Died");
+        Heal(playerHealth.Health);
+    }
+
+    void Heal(int healAmount)
+    {
+        currentHealth = Mathf.Clamp(healAmount, 0, playerHealth.Health);
+        healthDisplay.SetHealth(currentHealth);
     }
 }

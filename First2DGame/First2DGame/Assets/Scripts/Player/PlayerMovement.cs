@@ -13,11 +13,11 @@ public class PlayerMovement : MonoBehaviour
     // Dash
     private bool cdFinished = true;
     private bool dashing;
+    SpriteRenderer playerColour;
 
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        
+        playerColour = this.GetComponent<SpriteRenderer>();
     }
 
     // Update is called once per frame
@@ -78,7 +78,7 @@ public class PlayerMovement : MonoBehaviour
         while(dashing)
         {
             StartCoroutine(DashCooldown());
-            gameObject.GetComponent<SpriteRenderer>().color = new Color(10, 10, 10);
+            playerColour.color = new Color(10, 10, 10);
             playerStats.PlayerRB.AddForce(direction.normalized * playerStats.DashSpeed, ForceMode2D.Impulse);
             Debug.Log(direction.normalized);
             yield return new WaitForSeconds(playerStats.DashDuration);
@@ -86,7 +86,7 @@ public class PlayerMovement : MonoBehaviour
         }
         Debug.Log("Timer"); 
 
-        gameObject.GetComponent<SpriteRenderer>().color = Color.red;
+        playerColour.color = Color.red;
     }
 
     // Wait until the dash is off cooldown 

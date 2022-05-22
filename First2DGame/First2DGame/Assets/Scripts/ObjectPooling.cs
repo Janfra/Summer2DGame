@@ -45,17 +45,25 @@ public class ObjectPooling : MonoBehaviour
 
     public GameObject SpawnFromPool(string tag, Vector2 position, Quaternion rotation)
     {
+        Debug.Log("Spawning");
         if (!poolDictionary.ContainsKey(tag))
         {
             Debug.Log("Pool with tag: " + tag + " does not exist");
             return null;
-        } else if(poolDictionary.Count == 0)
+        } 
+        else if (poolDictionary.Count == 0)
         {
             Debug.Log("Emtpy pool");
             return null;
         }
 
         GameObject objectToSpawn = poolDictionary[tag].Dequeue();
+
+        if(objectToSpawn == null)
+        {
+            Debug.Log("Object from Dictionary is null");
+        }
+
         poolDictionary[tag].Enqueue(objectToSpawn);
         Debug.Log("Queued");
 
@@ -71,11 +79,5 @@ public class ObjectPooling : MonoBehaviour
         }
 
         return objectToSpawn;
-    }
-
-    public void Despawn(GameObject despawn, string tag, Vector2 position, Quaternion rotation)
-    {
-        despawn.SetActive(false);
-        SpawnFromPool(tag, position, rotation);
     }
 }
