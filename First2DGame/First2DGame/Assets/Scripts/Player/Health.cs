@@ -6,6 +6,7 @@ public class Health : MonoBehaviour
 {
     [SerializeField]
     private PlayerHealth_SO playerHealth;
+    [SerializeField]
     HealthBar healthDisplay;
     SpriteRenderer playerColour;
 

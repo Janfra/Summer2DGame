@@ -8,9 +8,12 @@ public class EnemyMovement : MonoBehaviour
     private EnemyScriptableObject enemyStats;
     [SerializeField]
     private Transform player;
-    public Transform playerGet { get => player; }
+    [SerializeField]
+    Animator animator;
     [SerializeField]
     private Rigidbody2D rb;
+    [SerializeField]
+    private SpriteRenderer enemyDisplay;
 
 
     // Start is called before the first frame update
@@ -34,6 +37,8 @@ public class EnemyMovement : MonoBehaviour
             // Move towards target
             Vector2 destination = Vector2.MoveTowards(transform.position, player.position, enemyStats.Speed * Time.fixedDeltaTime);
             rb.MovePosition(destination);
+            animator.SetBool("Moving", true);
+            enemyFlip();
 
             yield return null;
         }
@@ -43,10 +48,24 @@ public class EnemyMovement : MonoBehaviour
     // Courutine to run when in range
     IEnumerator AreaOfAttack()
     {
+        animator.SetBool("Moving", false);
         yield return new WaitForSeconds(enemyStats.chaseTimer);
         StartCoroutine(ChasePlayer());
     }
     #endregion
+
+    void enemyFlip()
+    {
+        Vector2 direction = transform.position - player.position;
+        if (Mathf.Sign(direction.x) == 1)
+        {
+            enemyDisplay.flipX = true;
+        }
+        else
+        {
+            enemyDisplay.flipX = false;
+        }
+    }
 
     // Show range in editor
     private void OnDrawGizmos()

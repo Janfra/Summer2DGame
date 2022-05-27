@@ -455,6 +455,7 @@ GameObject:
   - component: {fileID: 3250390543402408024}
   - component: {fileID: 3250390543402408031}
   - component: {fileID: 3250390543402408025}
+  - component: {fileID: 792797514536542631}
   - component: {fileID: 3250390543402408028}
   - component: {fileID: 3250390543402408026}
   - component: {fileID: 3250390543402408029}
@@ -546,7 +547,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerHealth: {fileID: 11400000, guid: 3483cb81a16848c4d876c3f1e3c38e47, type: 2}
-  currentHealth: 0
+  healthDisplay: {fileID: 3250390542162014150}
+  playerPrefab: {fileID: 0}
+  spawnPoint: {x: 0, y: 0}
 --- !u!114 &3250390543402408025
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -560,6 +563,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerStats: {fileID: 11400000, guid: a8212e5879b4f264baa1d95069326c86, type: 2}
+--- !u!114 &792797514536542631
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3250390543402408022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e928ebab207b1942aa6e398207cf14b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bulletRB: []
+  ammoType: ThrownStar
+  firePoint: {fileID: 3250390542035654410}
+  throwForce: 35
 --- !u!114 &3250390543402408028
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -572,13 +591,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e3b0b14345ac6441a4410c22bfa45b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerStats: {fileID: 11400000, guid: d0d5dd362e2ff5b488de093fa55aea10, type: 2}
-  firePoint: {fileID: 3250390542035654410}
-  throwStarPrefab: {fileID: 5523380523575467266, guid: 17b33fa0eafb83a4d9003e9b967bb4b0, type: 3}
-  throwForce: 25
-  textAmmo: {fileID: 3250390542901120381}
+  playerStats: {fileID: 11400000, guid: a8212e5879b4f264baa1d95069326c86, type: 2}
+  bulletGeneration: {fileID: 792797514536542631}
   totalAmmo: 5
-  ammo: 0
   rechargeTime: 1.5
 --- !u!50 &3250390543402408026
 Rigidbody2D:

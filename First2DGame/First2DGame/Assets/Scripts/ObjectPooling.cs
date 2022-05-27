@@ -11,7 +11,7 @@ public class ObjectPooling : MonoBehaviour
         public int size;
     }
 
-     #region Singlenton 
+    #region Singlenton
     public static ObjectPooling Instance;
 
     private void Awake()
@@ -24,15 +24,15 @@ public class ObjectPooling : MonoBehaviour
 
     [SerializeField]
     public Dictionary<string, Queue<GameObject>> poolDictionary;
-    // Start is called before the first frame update
-    void Start()
+
+    private void Start()
     {
         poolDictionary = new Dictionary<string, Queue<GameObject>>();
 
         foreach (Pool pool in pools)
         {
             Queue<GameObject> objectPool = new Queue<GameObject>();
-            for(int i = 0; i < pool.size; i++)
+            for (int i = 0; i < pool.size; i++)
             {
                 GameObject obj = Instantiate(pool.prefab);
                 obj.SetActive(false);
@@ -45,7 +45,6 @@ public class ObjectPooling : MonoBehaviour
 
     public GameObject SpawnFromPool(string tag, Vector2 position, Quaternion rotation)
     {
-        Debug.Log("Spawning");
         if (!poolDictionary.ContainsKey(tag))
         {
             Debug.Log("Pool with tag: " + tag + " does not exist");
@@ -65,7 +64,6 @@ public class ObjectPooling : MonoBehaviour
         }
 
         poolDictionary[tag].Enqueue(objectToSpawn);
-        Debug.Log("Queued");
 
         objectToSpawn.SetActive(true);
         objectToSpawn.transform.position = position;
@@ -79,5 +77,52 @@ public class ObjectPooling : MonoBehaviour
         }
 
         return objectToSpawn;
+    }
+
+
+    private int GetPoolArrayNumber(string tag)
+    {
+        for (int i = 0; i < pools.Count; i++)
+        {
+            if (pools[i].tag == tag)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public int GetPoolSize(string tag)
+    {
+        int poolArrayNumber = GetPoolArrayNumber(tag);
+        if(poolArrayNumber == -1)
+        {
+            Debug.Log("The tag given: " + tag + " does not exist");
+            return 0;
+        }
+        else
+        {
+            return pools[poolArrayNumber].size;
+        }
+    }
+
+    public Rigidbody2D GetRigidbody(string tag)
+    {
+        if (!poolDictionary.ContainsKey(tag))
+        {
+            Debug.LogError("Rigidbody requested a non-existing tag!");
+            return null;
+        }
+        else
+        {
+            GameObject objToRigidbody = poolDictionary[tag].Dequeue();
+            poolDictionary[tag].Enqueue(objToRigidbody);
+            if (objToRigidbody == null)
+                Debug.LogError("This pool is empty!");
+            Rigidbody2D returnRB = objToRigidbody.GetComponent<Rigidbody2D>();
+            if (returnRB == null)
+                Debug.LogError("Objects from this pool have no rigidbody!");
+            return returnRB;
+        }
     }
 }

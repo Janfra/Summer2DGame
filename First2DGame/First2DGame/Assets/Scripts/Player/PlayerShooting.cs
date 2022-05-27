@@ -12,26 +12,16 @@ public class PlayerShooting : MonoBehaviour
     Vector2 mousePosition;
 
     // Shooting
-    [field: SerializeField]
-    private Transform firePoint;
-    [field: SerializeField]
-    private float throwForce = 10.0f;
+    [SerializeField]
+    BulletsSpawn bulletGeneration;
     bool shooting = false;
 
-    // Ammo
+    // Ammo display
     TMP_Text ammoDisplay;
     public int totalAmmo = 5;
     private int ammo;
     public float rechargeTime = 1.5f;
     private bool recharging = false;
-
-    // Bullet Pooling
-    ObjectPooling objectPooler;
-    [field: SerializeField]
-    Rigidbody2D[] bulletRB;
-    int currentBullet = 0;
-    [field: SerializeField]
-    string ammoType;
 
     // Start is called before the first frame update
     void Awake()
@@ -39,22 +29,21 @@ public class PlayerShooting : MonoBehaviour
         // Get camera
         mainCam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
 
-        // Set the ammo
-        ammo = totalAmmo;
-
         // Get the text on screen and save it to change it
         GameObject ammoFinder = GameObject.Find("Ammo");
         ammoDisplay = ammoFinder.GetComponent<TMP_Text>();
 
         // Set the playerRB in the scriptable object
         playerStats.PlayerRB = this.GetComponent<Rigidbody2D>();
-
-        bulletRB = new Rigidbody2D[totalAmmo];
     }
 
     private void Start()
     {
-        objectPooler = ObjectPooling.Instance;
+        if (bulletGeneration == null)
+            bulletGeneration = this.GetComponent<BulletsSpawn>();
+        // Set the ammo
+        totalAmmo = Mathf.Clamp(totalAmmo, 1, ObjectPooling.Instance.GetPoolSize(bulletGeneration.GetAmmoType()));
+        ammo = totalAmmo;
     }
 
     // Update is called once per frame
@@ -85,21 +74,19 @@ public class PlayerShooting : MonoBehaviour
         // If you take a vector from another vector, you get a vector drawing a line in between the two, in this case, from mouse to player.
         Vector2 faceDirection = mousePosition - playerStats.PlayerRB.position;
         // Calculate the angle of the resulting vector and convert it to degrees, then change the rotation to it
-        float angle = Mathf.Atan2(faceDirection.y, faceDirection.x) * Mathf.Rad2Deg - 90f;
+        float angle = Mathf.Atan2(faceDirection.y, faceDirection.x) * Mathf.Rad2Deg - 90.0f;
         playerStats.PlayerRB.rotation = angle;
 
         if (shooting)
         {
-            ThrowStar();
+            Shoot();
         }
     }
 
     // Spawn throw star, store its information and then add force to it to "throw it".
-    void ThrowStar()
+    void Shoot()
     {
-        objectPooler.SpawnFromPool(ammoType, firePoint.position, firePoint.rotation);
-        bulletRB[currentBullet].AddForce(firePoint.up * throwForce, ForceMode2D.Impulse);
-        NextBullet();
+        bulletGeneration.SpawnBullet();
         ammoDisplay.text = "Ammo: " + ammo;
         shooting = false;
     }
@@ -122,28 +109,4 @@ public class PlayerShooting : MonoBehaviour
         ammoDisplay.text = "Ammo: " + ammo;
     }
 
-    void BulletStoring()
-    {
-        for(int i = 0; i < totalAmmo; i++)
-        {
-            GameObject bullet = objectPooler.SpawnFromPool(ammoType, firePoint.position, firePoint.rotation);
-            bulletRB[i] = bullet.GetComponent<Rigidbody2D>();
-            bullet.SetActive(false);
-        }
-    }
-
-    public void BulletStore(Rigidbody2D rigidbody2D)
-    {
-        bulletRB[currentBullet] = rigidbody2D;
-        NextBullet();
-    }
-
-    void NextBullet()
-    {
-        currentBullet++;
-        if(currentBullet == totalAmmo)
-        {
-            currentBullet = 0;
-        }
-    }
 }

@@ -6,13 +6,16 @@ public class EnemyHealth : MonoBehaviour
 {
     [SerializeField]
     EnemyHealth_SO totalHealth;
+    [SerializeField]
     HealthBar healthDisplay;
     public int currentHealth;
     SpriteRenderer enemyColour;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
+        if (totalHealth == null)
+            totalHealth = (EnemyHealth_SO)ScriptableObject.CreateInstance(typeof(EnemyHealth_SO));
         currentHealth = totalHealth.Health;
         enemyColour = this.GetComponent<SpriteRenderer>();
         healthDisplay = GetComponentInChildren<HealthBar>();
@@ -42,7 +45,7 @@ public class EnemyHealth : MonoBehaviour
     {
         enemyColour.color = Color.red;
         yield return new WaitForSeconds(0.1f);
-        enemyColour.color = new Color(0f, 0.7098039f, 1f);
+        enemyColour.color = Color.white;
     }
 
     IEnumerator Died()
